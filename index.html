@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026级监测2班 · 课堂作业提交情况统计</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:26px 18px 56px;
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+    background:#eef2f8;color:#1f2937;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1600px;margin:0 auto;}
+
+  header h1{font-size:24px;margin:0 0 6px;color:#0f172a;letter-spacing:.3px;}
+  header p{margin:0 0 18px;color:#64748b;font-size:13.5px;line-height:1.7;}
+
+  /* ---------- 统计卡片 ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:18px;}
+  .stat{background:#fff;border-radius:14px;padding:15px 16px;box-shadow:0 2px 10px rgba(15,23,42,.06);border:1px solid #f1f5f9;}
+  .stat .v{font-size:26px;font-weight:700;color:#1d4ed8;line-height:1.15;letter-spacing:.5px;}
+  .stat .v.red{color:#dc2626;}
+  .stat .v.green{color:#16a34a;}
+  .stat .v.orange{color:#ea580c;}
+  .stat .v.gray{color:#64748b;}
+  .stat .k{font-size:12.5px;color:#64748b;margin-top:6px;line-height:1.45;}
+
+  /* ---------- 卡片 / 图表 ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border-radius:14px;padding:18px 20px 20px;box-shadow:0 2px 10px rgba(15,23,42,.06);border:1px solid #f1f5f9;margin-bottom:18px;}
+  .card h2{font-size:16px;margin:0 0 4px;color:#0f172a;}
+  .card .sub{font-size:12.5px;color:#94a3b8;margin:0 0 14px;}
+  .chart-box{position:relative;height:340px;}
+  .chart-box.tall{height:400px;}
+
+  /* ---------- 表格 ---------- */
+  .table-wrap{max-height:720px;overflow:auto;border-radius:10px;border:1px solid #eef2f7;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:8px 6px;border-bottom:1px solid #eef2f7;text-align:left;white-space:nowrap;}
+  thead th{background:#f8fafc;position:sticky;top:0;z-index:3;font-weight:600;color:#334155;font-size:12px;}
+  tbody tr:hover{background:#f5faff;}
+  .c{text-align:center;}
+  .mono{font-family:Consolas,Monaco,monospace;color:#64748b;font-size:12px;}
+  .dot{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:6px;font-size:12px;font-weight:700;text-align:center;}
+  .dot.ok{color:#15803d;background:#dcfce7;}
+  .dot.no{color:#b91c1c;background:#fee2e2;}
+  .dot.miss{color:#c2410c;background:#ffedd5;}
+  .dot.na{color:#94a3b8;background:#f1f5f9;}
+  .num{font-weight:700;}
+  .strong{font-weight:700;}
+  .red{color:#dc2626;}
+  .orange{color:#ea580c;}
+  .green{color:#16a34a;}
+  .gray{color:#64748b;}
+  tr.row-danger{background:#fff5f5;}
+  tr.row-danger:hover{background:#ffecec;}
+  tr.row-warn{background:#fffdf5;}
+  tr.row-warn:hover{background:#fffaeb;}
+
+  /* ---------- 工具栏 ---------- */
+  .toolbar{margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .btn{
+    border:1px solid #cbd5e1;background:#fff;border-radius:9px;padding:7px 15px;
+    font-size:13px;cursor:pointer;color:#334155;transition:.15s;font-family:inherit;
+  }
+  .btn:hover{background:#f1f5f9;}
+  .btn.active{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.28);}
+  .search{
+    border:1px solid #cbd5e1;border-radius:9px;padding:7px 12px;font-size:13px;
+    font-family:inherit;outline:none;width:170px;color:#334155;
+  }
+  .search:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .legend-note{font-size:12.5px;color:#94a3b8;margin-top:12px;line-height:1.8;}
+  .tip{font-size:12px;color:#94a3b8;margin-left:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>2026级监测2班 · 课堂作业提交情况统计</h1>
+    <p>
+      2026-2027学年第一学期 &nbsp;|&nbsp; 统计范围：9月22日、9月24日、10月8日（作业一·打字练习 / 作业二·文件夹相关操作练习）、
+      10月12日、10月13日（作业一·打字练习 / 作业二·系统答题）、10月15日（作业1 / 作业2）、10月19日、10月20日、
+      10月22日（作业1 / 作业2 / 作业3）、11月3日（表格练习 / 噪音污染监测报告练习），共 <strong>16</strong> 次作业
+      &nbsp;|&nbsp; 全班 <strong>50</strong> 人 &nbsp;|&nbsp; 空单元格 / “-” 按“未统计”处理，<strong>不纳入分母</strong>；“未找到”仍按未提交统计。
+    </p>
+  </header>
+
+  <!-- 概览数字 -->
+  <div class="stats" id="stats"></div>
+
+  <!-- 环形图 + 柱形图 -->
+  <div class="grid">
+    <div class="card">
+      <h2>各同学缺交作业次数分布（环形图）</h2>
+      <p class="sub">按每人缺交次数分组，统计对应人数（仅统计有记录的作业）</p>
+      <div class="chart-box"><canvas id="donut"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>每次作业提交 / 未交 / 未统计人数（柱形图）</h2>
+      <p class="sub">堆叠显示，单位：人（全班 50 人）；提交率分母不含“未统计”</p>
+      <div class="chart-box"><canvas id="bar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 横向条形图 -->
+  <div class="card">
+    <h2>缺交作业同学名单及次数（条形图）</h2>
+    <p class="sub" id="hbarSub">按缺交次数从高到低排列</p>
+    <div class="chart-box tall" id="hbBox"><canvas id="hbar"></canvas></div>
+  </div>
+
+  <!-- 明细表 -->
+  <div class="card">
+    <h2>全班作业提交明细表</h2>
+    <p class="sub">√ 已提交 &nbsp;/&nbsp; × 未提交 &nbsp;/&nbsp; ? 未找到 &nbsp;/&nbsp; — 未统计 &nbsp;|&nbsp; 点击按钮可切换排序与筛选</p>
+    <div class="toolbar">
+      <button class="btn active" id="sortId">按学号排序</button>
+      <button class="btn" id="sortMiss">按缺交次数排序</button>
+      <button class="btn" id="onlyMiss">只看缺交同学</button>
+      <input class="search" id="search" type="text" placeholder="搜索姓名 / 学号">
+      <span class="tip" id="countTip"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="theadRow"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="legend-note">
+      说明：9月22日、9月24日、10月12日、10月19日、10月20日为单次课堂作业；<br>
+      10月8日 ① = 打字练习，② = 文件夹相关操作练习；10月13日 ① = 打字练习，② = 系统答题；<br>
+      10月15日 ① = 作业1，② = 作业2；10月22日 ① = 作业1，② = 作业2，③ = 作业3；<br>
+      11月3日 ① = 表格练习，② = 噪音污染监测报告练习。<br>
+      空单元格 / “-”（无记录）按“未统计”处理，不纳入该生/该次作业的分母；“未找到”仍按未提交统计（纳入分母）。<br>
+      表格中“统计”列 = 该生有记录的作业次数；已交 + 缺交 = 统计。全勤 = 有统计的作业全部提交。
+    </p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 作业列定义（16 次） ================= */
+  const HW = [
+    { label: '9月22日',   note: '课堂作业' },
+    { label: '9月24日',   note: '课堂作业' },
+    { label: '10月8日①',  note: '打字练习' },
+    { label: '10月8日②',  note: '文件夹相关操作练习' },
+    { label: '10月12日',  note: '课堂作业' },
+    { label: '10月13日①', note: '打字练习' },
+    { label: '10月13日②', note: '系统答题' },
+    { label: '10月15日①', note: '作业1' },
+    { label: '10月15日②', note: '作业2' },
+    { label: '10月19日',  note: '课堂作业' },
+    { label: '10月20日',  note: '课堂作业' },
+    { label: '10月22日①', note: '作业1' },
+    { label: '10月22日②', note: '作业2' },
+    { label: '10月22日③', note: '作业3' },
+    { label: '11月3日①',  note: '表格练习' },
+    { label: '11月3日②',  note: '噪音污染监测报告练习' }
+  ];
+  const N_HW = HW.length;   // 16
+
+  /* ================= 原始数据 =================
+     1 = 已交, 0 = 未交, 'M' = 未找到, null = 无记录（未统计 / “-”）
+  =============================================== */
+  const RAW = [
+    ["2608010201","曹梓晞",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010202","陈皓",  1,0,0,0,1,1,1,1,1,1,1,1,'M','M',1,1],
+    ["2608010203","陈皓扬",1,0,0,0,0,1,0,1,0,1,0,1,1,'M',1,1],
+    ["2608010204","陈峻熙",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,'M'],
+    ["2608010205","陈浚贤",1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1],
+    ["2608010206","陈亮志",1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,'M'],
+    ["2608010207","陈启航",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010208","邓骁航",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010209","葛嘉劲",0,0,0,0,0,1,0,0,0,0,1,1,1,'M',1,'M'],
+    ["2608010210","顾峻宁",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010211","郭美幸",1,0,1,0,1,1,1,1,0,1,1,1,1,'M',1,1],
+    ["2608010212","胡静蕾",1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010213","胡睿彤",0,0,1,0,1,1,0,1,0,1,1,1,1,1,1,'M'],
+    ["2608010214","黄梓杰",0,0,0,0,0,1,1,0,0,1,1,1,1,'M',1,1],
+    ["2608010215","邝晓晴",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010216","邝志斌",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010217","李家敏",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010218","李铠",  1,0,0,0,1,1,1,1,1,1,1,1,1,'M','M','M'],
+    ["2608010219","梁恬甄",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010220","廖成聚",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010221","廖馨",  1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010222","林淇淇",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010223","龙彬豪",1,0,1,1,0,1,0,1,0,1,1,1,'M','M',1,'M'],
+    ["2608010224","陆雯乐",1,0,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010225","陆允祥",0,0,0,0,0,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010226","罗俊锐",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010227","马骏骞",0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010228","莫美键",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010229","潘桂晴",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010230","瞿彦哲",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010231","苏宸宇",0,0,1,1,1,1,1,0,1,1,1,1,1,1,1,'M'],
+    ["2608010232","陶俊洋",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010233","王耀洋",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010234","文颖萱",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010236","吴军博",0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010237","乡梓健",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010238","谢汶轩",1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
+    ["2608010239","徐文灏",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010240","颜诗庭",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010241","余苏灿",1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,'M'],
+    ["2608010242","张佳源",1,0,0,0,0,0,0,1,1,0,1,1,'M','M',1,'M'],
+    ["2608010243","张峻熙",1,1,0,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010244","张可馨",1,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010245","张瑞",  0,1,1,1,1,1,1,1,1,1,1,1,1,'M',1,1],
+    ["2608010246","张煜沣",1,0,0,0,1,1,0,1,0,0,1,1,1,1,1,1],
+    ["2608010247","郑灿楷",1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
+    ["2608010248","郑可桐",1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010249","钟赞洋",1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["2608010250","钟子淇",1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ["0000000000","陈泳涵",null,null,null,null,null,null,null,null,null,null,null,1,1,1,1,'M']
+  ];
+
+  /* ================= 数据计算 ================= */
+  const students = RAW.map(function (row) {
+    const id = row[0], name = row[1], flags = row.slice(2);
+    const submitted = flags.filter(function (f) { return f === 1; }).length;
+    const count = flags.filter(function (f) { return f !== null; }).length;
+    return {
+      id: id,
+      name: name,
+      flags: flags,
+      submitted: submitted,
+      count: count,
+      missed: count - submitted
+    };
+  });
+
+  const TOTAL         = students.length;                 // 50
+  const TOTAL_SLOTS   = TOTAL * N_HW;                    // 800
+  const TOTAL_SUBMIT  = students.reduce(function (a, s) { return a + s.submitted; }, 0);
+  const TOTAL_STAT    = students.reduce(function (a, s) { return a + s.count; }, 0);
+  const TOTAL_NA      = TOTAL_SLOTS - TOTAL_STAT;
+  const TOTAL_MISS    = TOTAL_STAT - TOTAL_SUBMIT;
+  const RATE          = TOTAL_STAT ? (TOTAL_SUBMIT / TOTAL_STAT * 100) : 0;
+  const FULL          = students.filter(function (s) { return s.count > 0 && s.missed === 0; }).length;
+
+  const perHW = HW.map(function (h, i) {
+    const ok   = students.filter(function (s) { return s.flags[i] === 1; }).length;
+    const miss = students.filter(function (s) { return s.flags[i] === 0 || s.flags[i] === 'M'; }).length;
+    const na   = students.filter(function (s) { return s.flags[i] === null; }).length;
+    const stat = ok + miss;
+    return {
+      label: h.label,
+      note: h.note,
+      ok: ok,
+      miss: miss,
+      na: na,
+      stat: stat,
+      rate: stat ? (ok / stat * 100) : 0
+    };
+  });
+
+  // 缺交次数分布（只保留人数 > 0 的档位；仅统计有记录的学生）
+  const dist = [];
+  for (let n = 0; n <= N_HW; n++) {
+    const c = students.filter(function (s) { return s.count > 0 && s.missed === n; }).length;
+    if (c > 0) dist.push({ n: n, c: c });
+  }
+
+  const missers = students.filter(function (s) { return s.missed > 0; })
+    .sort(function (a, b) { return b.missed - a.missed || a.id.localeCompare(b.id); });
+
+  /* ================= 颜色档位 ================= */
+  const PALETTE = ['#22c55e','#84cc16','#a3e635','#eab308','#f59e0b','#f97316',
+                   '#ef4444','#dc2626','#b91c1c','#991b1b','#7f1d1d','#5b0e0e','#3f0a0a','#2a0606','#180303','#0f0202','#070101'];
+  function lv(n) { return PALETTE[Math.min(n, PALETTE.length - 1)]; }
+
+  /* ================= 概览卡片 ================= */
+  document.getElementById('stats').innerHTML =
+    '<div class="stat"><div class="v">' + TOTAL + '</div><div class="k">班级人数</div></div>' +
+    '<div class="stat"><div class="v">' + N_HW + '</div><div class="k">统计作业次数</div></div>' +
+    '<div class="stat"><div class="v">' + TOTAL_STAT + '</div><div class="k">总统计人次（有记录）</div></div>' +
+    '<div class="stat"><div class="v green">' + TOTAL_SUBMIT + '</div><div class="k">已交作业人次</div></div>' +
+    '<div class="stat"><div class="v red">' + TOTAL_MISS + '</div><div class="k">未交作业人次</div></div>' +
+    '<div class="stat"><div class="v gray">' + TOTAL_NA + '</div><div class="k">未统计人次（不计分母）</div></div>' +
+    '<div class="stat"><div class="v">' + RATE.toFixed(1) + '%</div><div class="k">总体提交率（不含未统计）</div></div>' +
+    '<div class="stat"><div class="v green">' + FULL + '</div><div class="k">全勤（有统计作业全交）</div></div>' +
+    '<div class="stat"><div class="v orange">' + missers.length + '</div><div class="k">至少缺交 1 次</div></div>';
+
+  /* ================= 图表 ================= */
+  const hasChart = (typeof Chart !== 'undefined');
+  if (!hasChart) {
+    document.querySelectorAll('.chart-box').forEach(function (b) {
+      b.innerHTML = '<p style="color:#dc2626;padding:24px;font-size:14px">图表库加载失败（可能无网络）。请联网后刷新页面查看图表。</p>';
+    });
+  } else {
+    Chart.defaults.font.family = '"Microsoft YaHei","PingFang SC",system-ui,sans-serif';
+    Chart.defaults.color = '#475569';
+
+    /* —— 环形图：缺交次数分布 —— */
+    new Chart(document.getElementById('donut'), {
+      type: 'doughnut',
+      data: {
+        labels: dist.map(function (d) {
+          return d.n === 0 ? '缺交 0 次' : '缺交 ' + d.n + ' 次';
+        }),
+        datasets: [{
+          data: dist.map(function (d) { return d.c; }),
+          backgroundColor: dist.map(function (d) { return lv(d.n); }),
+          borderColor: '#fff',
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+          legend: { position: 'right', labels: { boxWidth: 12, boxHeight: 12, padding: 9, font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: function (c) {
+                return ' ' + c.label + '：' + c.parsed + ' 人（占有记录学生 ' + (c.parsed / TOTAL * 100).toFixed(1) + '%）';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    /* —— 柱形图：每次作业提交 / 未交 / 未统计 —— */
+    new Chart(document.getElementById('bar'), {
+      type: 'bar',
+      data: {
+        labels: HW.map(function (h) { return h.label; }),
+        datasets: [
+          {
+            label: '已交',
+            data: perHW.map(function (h) { return h.ok; }),
+            backgroundColor: '#3b82f6',
+            borderRadius: 6,
+            maxBarThickness: 30
+          },
+          {
+            label: '未交',
+            data: perHW.map(function (h) { return h.miss; }),
+            backgroundColor: '#f97316',
+            borderRadius: 6,
+            maxBarThickness: 30
+          },
+          {
+            label: '未统计',
+            data: perHW.map(function (h) { return h.na; }),
+            backgroundColor: '#cbd5e1',
+            borderRadius: 6,
+            maxBarThickness: 30
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            stacked: true,
+            grid: { display: false },
+            ticks: { font: { size: 8.5 }, maxRotation: 60, minRotation: 30 }
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            max: TOTAL,
+            grid: { color: '#eef2f7' },
+            ticks: { stepSize: 10 }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, usePointStyle: true } },
+          tooltip: {
+            callbacks: {
+              afterTitle: function (items) {
+                const h = perHW[items[0].dataIndex];
+                return h.label + '（' + h.note + '）\n提交率：' + h.rate.toFixed(1) + '%（基于 ' + h.stat + ' 人统计）';
+              },
+              label: function (c) {
+                const h = perHW[c.dataIndex];
+                if (c.dataset.label === '未统计') {
+                  return ' 未统计：' + c.parsed.y + ' 人（不纳入分母）';
+                }
+                if (!h.stat) return ' ' + c.dataset.label + '：0 人';
+                return ' ' + c.dataset.label + '：' + c.parsed.y + ' 人（占统计 ' + (c.parsed.y / h.stat * 100).toFixed(1) + '%）';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    /* —— 横向条形图：缺交同学名单 —— */
+    const hbBox = document.getElementById('hbBox');
+    hbBox.style.height = Math.max(320, missers.length * 26 + 70) + 'px';
+    document.getElementById('hbarSub').textContent =
+      '共 ' + missers.length + ' 人至少缺交 1 次，按缺交次数从高到低排列（各人统计次数可能不同，空值未统计不纳入分母）';
+
+    new Chart(document.getElementById('hbar'), {
+      type: 'bar',
+      data: {
+        labels: missers.map(function (s) { return s.name + ' ' + s.id.slice(-2); }),
+        datasets: [{
+          label: '缺交次数',
+          data: missers.map(function (s) { return s.missed; }),
+          backgroundColor: missers.map(function (s) { return lv(s.missed); }),
+          borderRadius: 4,
+          maxBarThickness: 16
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: N_HW,
+            ticks: { stepSize: 1 },
+            grid: { color: '#eef2f7' },
+            title: { display: true, text: '缺交次数' }
+          },
+          y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: function (items) {
+                const s = missers[items[0].dataIndex];
+                return s.name + '（' + s.id + '）';
+              },
+              label: function (c) {
+                const s = missers[c.dataIndex];
+                return ' 缺交 ' + c.parsed.x + ' 次 / 共 ' + s.count + ' 次统计，已交 ' + s.submitted + ' 次';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ================= 明细表 ================= */
+  const tbody    = document.getElementById('tbody');
+  const theadRow = document.getElementById('theadRow');
+  const countTip = document.getElementById('countTip');
+
+  theadRow.innerHTML =
+    '<th>学号</th><th>姓名</th>' +
+    HW.map(function (h) {
+      return '<th class="c" title="' + h.label + ' · ' + h.note + '">' + h.label + '</th>';
+    }).join('') +
+    '<th class="c">已交</th><th class="c">缺交</th><th class="c">统计</th>';
+
+  let sortMode = 'id';     // 'id' | 'miss'
+  let onlyMiss = false;
+  let keyword  = '';
+
+  function cellHTML(v, h) {
+    if (v === 1) return '<td class="c"><span class="dot ok" title="' + h.label + ' ' + h.note + '：已提交">√</span></td>';
+    if (v === 0) return '<td class="c"><span class="dot no" title="' + h.label + ' ' + h.note + '：未提交">×</span></td>';
+    if (v === 'M') return '<td class="c"><span class="dot miss" title="' + h.label + ' ' + h.note + '：未找到，按未提交统计">?</span></td>';
+    return '<td class="c"><span class="dot na" title="' + h.label + ' ' + h.note + '：无记录，未统计（不纳入分母）">—</span></td>';
+  }
+
+  function render() {
+    let rows = students.slice();
+
+    if (onlyMiss) rows = rows.filter(function (s) { return s.missed > 0; });
+
+    if (keyword) {
+      const k = keyword.trim();
+      rows = rows.filter(function (s) {
+        return s.name.indexOf(k) !== -1 || s.id.indexOf(k) !== -1;
+      });
+    }
+
+    if (sortMode === 'miss') {
+      rows.sort(function (a, b) { return b.missed - a.missed || a.id.localeCompare(b.id); });
+    } else {
+      rows.sort(function (a, b) { return a.id.localeCompare(b.id); });
+    }
+
+    countTip.textContent = '当前显示 ' + rows.length + ' / ' + TOTAL + ' 人';
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="' + (N_HW + 5) + '" class="c" style="padding:26px;color:#94a3b8">没有符合条件的记录</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(function (s) {
+      const rowCls = s.missed >= 7 ? 'row-danger' : (s.missed >= 1 ? 'row-warn' : '');
+      const missCls = s.missed === 0 ? 'green' : (s.missed <= 2 ? 'orange' : 'red');
+
+      const cells = s.flags.map(function (f, i) {
+        return cellHTML(f, HW[i]);
+      }).join('');
+
+      return '<tr class="' + rowCls + '">' +
+        '<td class="mono">' + s.id + '</td>' +
+        '<td class="strong">' + s.name + '</td>' +
+        cells +
+        '<td class="c num green">' + s.submitted + '</td>' +
+        '<td class="c num ' + missCls + '">' + s.missed + '</td>' +
+        '<td class="c num gray">' + s.count + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  const btnId   = document.getElementById('sortId');
+  const btnMiss = document.getElementById('sortMiss');
+  const btnOnly = document.getElementById('onlyMiss');
+  const input   = document.getElementById('search');
+
+  btnId.addEventListener('click', function () {
+    sortMode = 'id';
+    btnId.classList.add('active');
+    btnMiss.classList.remove('active');
+    render();
+  });
+
+  btnMiss.addEventListener('click', function () {
+    sortMode = 'miss';
+    btnMiss.classList.add('active');
+    btnId.classList.remove('active');
+    render();
+  });
+
+  btnOnly.addEventListener('click', function () {
+    onlyMiss = !onlyMiss;
+    btnOnly.classList.toggle('active', onlyMiss);
+    render();
+  });
+
+  input.addEventListener('input', function () {
+    keyword = this.value;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
